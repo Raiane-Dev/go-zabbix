@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // ErrNotFound describes an empty result set for an API call.
@@ -45,17 +46,29 @@ func NewSession(url string, username string, password string) (session *Session,
 
 func (c *Session) login(username, password string) error {
 	// get Zabbix API version
-	_, err := c.GetVersion()
+	v_str, err := c.GetVersion()
 	if err != nil {
 		return fmt.Errorf("Failed to retrieve Zabbix API version: %v", err)
 	}
 
-	// login to API
 	params := map[string]string{
 		"user":     username,
 		"password": password,
 	}
 
+	v_f, err := strconv.ParseFloat(v_str, 64)
+	if err != nil {
+		return err
+	}
+
+	if v_f >= 6 {
+		params = map[string]string{
+			"username": username,
+			"password": password,
+		}
+	}
+
+	// login to API
 	res, err := c.Do(NewRequest("user.login", params))
 	if err != nil {
 		return fmt.Errorf("Error logging in to Zabbix API: %v", err)
