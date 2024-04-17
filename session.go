@@ -56,7 +56,7 @@ func (c *Session) login(username, password string) error {
 		"password": password,
 	}
 
-	v_f, err := strconv.ParseFloat(v_str, 64)
+	v_f, err := strconv.ParseFloat(v_str[:2], 64)
 	if err != nil {
 		return err
 	}
